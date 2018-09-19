@@ -21,12 +21,20 @@ public final class GitHookInstallMojo extends AbstractMojo {
     private static final Path HOOK_DIR_PATH = Paths.get(".git/hooks");
 
     @Parameter
+    private boolean notGitRepoThrowException = false;
+
+    @Parameter
     private Map<String, String> hooks;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (!Files.exists(HOOK_DIR_PATH)) {
-            throw new MojoExecutionException("not a git repository");
+            if (notGitRepoThrowException) {
+                throw new MojoExecutionException("not a git repository");
+            } else {
+                getLog().warn("not found `.git/hooks`, this folder not a git repository");
+                return;
+            }
         }
         for (Map.Entry<String, String> hook : hooks.entrySet()) {
             String hookName = hook.getKey();
